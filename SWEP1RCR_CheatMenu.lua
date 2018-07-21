@@ -94,6 +94,7 @@ function onActivate()
 end
 
 function patchGame()
+	print("patchGame")
 	reinitializeSymbolhandler()
 	-- Enable Cheat Menu
 	autoAssemble(asm)
@@ -197,6 +198,8 @@ function onTimer(sender)
 		end
 	end
 
+	local linked = (pid ~= nil)
+
 	if (linked) then
 		PRCM.CELabel8.font.color = 0xff9933
 		PRCM.CELabel8.Caption = "SWEP1RCR.exe ("..pid..") Linked"
@@ -206,7 +209,6 @@ function onTimer(sender)
 		PRCM.CELabel8.Caption = "Looking for SWEP1RCR.exe"
 	end
 
-	local linked = (pid ~= nil)
     local enabled = (loadState == 0)
 	PRCM.CMPanel1.Enabled = enabled
 	PRCM.CMPanel2.Enabled = enabled
@@ -222,6 +224,8 @@ function watchForLoading()
         
 		writeBytes("EventLoad",0x00)
 		loadState = loadState + 1
+
+		print("Event Load " .. loadState)
 	end
 
 	if (readBytes("EventUnload",1,false) == 0x01) then
@@ -230,6 +234,7 @@ function watchForLoading()
 
 		if (loadState > 0) then
 			loadState = loadState - 1
+			print("Event Unload " .. loadState)
 
 			-- Invincibility
 			PRCM.CMToggleBox1.Checked = (readBytes("SWEP1RCR.exe+10CA28", 1, false) == 0x01)
