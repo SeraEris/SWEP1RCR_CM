@@ -6,6 +6,11 @@ local aiSpread = "20.00"
 local deathMin = "325.00"
 local deathDrop = "140.00"
 
+local oldAiLevel = ""
+local oldAiSpread = ""
+local oldDeathMin = ""
+local oldDeathDrop = ""
+
 local pid = nil
 local loadState = 0
 
@@ -90,10 +95,19 @@ function onActivate()
 		configPath = TrainerOrigin.."SWEP1RCR_CM.cfg"
 	end
 
+	PRCM.show()
+	PRCM.centerScreen()
+
 	loadSettings()
 end
 
+function onClose()
+	closeCE()
+end
+
 function patchGame()
+
+	loadState = 0
 
 	reinitializeSymbolhandler()
 	-- Enable Cheat Menu
@@ -184,7 +198,12 @@ end
 function onTimer(sender)
 	local id = getProcessIDFromProcessName("SWEP1RCR.exe")
 
-	if (id ~= nil) and (id ~= pid) then
+	if (id == nil)then
+		if (pid ~= nil) then
+			pid = nil
+			loadState = 0
+		end
+	elseif (id ~= pid) then
 		if (id ~= getOpenedProcessID()) then
 			openProcess(id)
 		end
@@ -291,7 +310,7 @@ function saveSettings(reinject)
 		file:close()
 	end
 
-	if (reinject) then
+	if ((reinject) and (pid ~= nil)) then
 		local inj = injectSettings()
 		autoAssemble(inj)
 	end
@@ -316,6 +335,8 @@ function loadSettings()
 	end
 end
 
+-- Generics for EditBox and ToggleBox
+
 function toggleButton(sender)
 	if (sender.Checked) then
 		sender.Caption = "On"
@@ -325,15 +346,60 @@ function toggleButton(sender)
 	saveSettings(true)
 end
 
+function cancelOnEscape(sender, key)
+	if (key == VK_ESCAPE) then
+		sender.text = ".."
+		sender.Enabled = false
+		sender.Enabled = true
+	end
+end
+
+-- Edit AI Level
+
+function enterAiLevel(sender)
+	oldAiLevel = aiLevel
+end
+
+function exitAiLevel(sender)
+	local input = tostring(tonumber(sender.Text))
+	if (input ~= sender.Text) then
+		aiLevel = oldAiLevel
+	end
+	sender.Text = aiLevel
+	saveSettings(true)
+end
+
 function changeAiLevel(sender)
 	local input = tostring(tonumber(sender.Text))
 	if (input == sender.Text) then
 		local val = tonumber(string.format("%.2f", input))
-		val = math.max(math.min(val, 20.00), 0.00)
+		val = math.max(math.min(val, 20.00), 2.00)
 		aiLevel = string.format("%.2f", val)
 		saveSettings(true)
 	end
-	sender.Text = aiLevel
+end
+
+function keyUpAiLevel(sender, key)
+	if (key == VK_RETURN) then
+		sender.Text = aiLevel
+	else
+		cancelOnEscape(sender, key)
+	end
+end
+
+-- Edit AI Spread
+
+function enterAiSpread(sender)
+	oldAiSpread = aiSpread
+end
+
+function exitAiSpread(sender)
+	local input = tostring(tonumber(sender.Text))
+	if (input ~= sender.Text) then
+		aiSpread = oldAiSpread
+	end
+	sender.Text = aiSpread
+	saveSettings(true)
 end
 
 function changeAiSpread(sender)
@@ -344,7 +410,29 @@ function changeAiSpread(sender)
 		aiSpread = string.format("%.2f", val)
 		saveSettings(true)
 	end
-    sender.Text = aiSpread
+end
+
+function keyUpAiSpread(sender, key)
+	if (key == VK_RETURN) then
+		sender.Text = aiSpread
+	else
+		cancelOnEscape(sender, key)
+	end
+end
+
+-- Edit Death Speed Min
+
+function enterSpeedMin(sender)
+	oldDeathMin = deathMin
+end
+
+function exitSpeedMin(sender)
+	local input = tostring(tonumber(sender.Text))
+	if (input ~= sender.Text) then
+		deathMin = oldDeathMin
+	end
+	sender.Text = deathMin
+	saveSettings(true)
 end
 
 function changeSpeedMin(sender)
@@ -355,7 +443,29 @@ function changeSpeedMin(sender)
 		deathMin = string.format("%.2f", val)
 		saveSettings(true)
 	end
-	sender.Text = deathMin
+end
+
+function keyUpSpeedMin(sender, key)
+	if (key == VK_RETURN) then
+		sender.Text = deathMin
+	else
+		cancelOnEscape(sender, key)
+	end
+end
+
+-- Edit Death Speed Drop
+
+function enterSpeedDrop(sender)
+	oldDeathDrop = deathDrop
+end
+
+function exitSpeedDrop(sender)
+	local input = tostring(tonumber(sender.Text))
+	if (input ~= sender.Text) then
+		deathDrop = oldDeathDrop
+	end
+	sender.Text = deathDrop
+	saveSettings(true)
 end
 
 function changeSpeedDrop(sender)
@@ -366,7 +476,14 @@ function changeSpeedDrop(sender)
 		deathDrop = string.format("%.2f", val)
 		saveSettings(true)
 	end
-	sender.Text = deathDrop
+end
+
+function keyUpSpeedDrop(sender, key)
+	if (key == VK_RETURN) then
+		sender.Text = deathDrop
+	else
+		cancelOnEscape(sender, key)
+	end
 end
 
 PRCM:show()
