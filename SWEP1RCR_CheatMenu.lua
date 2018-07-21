@@ -94,7 +94,7 @@ function onActivate()
 end
 
 function patchGame()
-	print("patchGame")
+
 	reinitializeSymbolhandler()
 	-- Enable Cheat Menu
 	autoAssemble(asm)
@@ -224,8 +224,6 @@ function watchForLoading()
         
 		writeBytes("EventLoad",0x00)
 		loadState = loadState + 1
-
-		print("Event Load " .. loadState)
 	end
 
 	if (readBytes("EventUnload",1,false) == 0x01) then
@@ -234,7 +232,6 @@ function watchForLoading()
 
 		if (loadState > 0) then
 			loadState = loadState - 1
-			print("Event Unload " .. loadState)
 
 			-- Invincibility
 			PRCM.CMToggleBox1.Checked = (readBytes("SWEP1RCR.exe+10CA28", 1, false) == 0x01)
